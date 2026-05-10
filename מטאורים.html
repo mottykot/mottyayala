@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="he">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>חוסה מטאוריטים — משחק קצר</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#0f1724;--accent:#6ee7b7;--danger:#ff7b72}
+    *{box-sizing:border-box;font-family:system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#020617 0%,var(--bg) 60%);color:#e6eef8}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+    .card{width:920px;max-width:98vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);display:grid;grid-template-columns:1fr 320px;gap:16px}
+    canvas{width:100%;height:600px;border-radius:8px;background:radial-gradient(ellipse at bottom,#021129 0%,transparent 40%), linear-gradient(180deg,transparent, rgba(0,0,0,0.25));display:block}
+    .sidebar{padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border-radius:8px}
+    h1{margin:4px 0 8px;font-size:20px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accent),#34d399);color:#022;box-shadow:0 6px 18px rgba(49,151,129,0.12);border:none}
+    .stat{margin:12px 0;padding:10px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
+    .hint{font-size:13px;opacity:0.8}
+    .footer{margin-top:12px;font-size:13px;color:rgba(255,255,255,0.7)}
+    .big{font-size:28px;font-weight:700}
+    .center{text-align:center}
+    .muted{opacity:0.7}
+    .row{display:flex;gap:8px;align-items:center}
+    .score-pill{display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+    @media (max-width:900px){.card{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application">
+      <div>
+        <canvas id="game" width="800" height="600" aria-label="מגרש המשחק"></canvas>
+      </div>
+
+      <aside class="sidebar" aria-label="בקרות וסטטיסטיקות">
+        <h1>חוסה מטאוריטים</h1>
+        <div class="stat">
+          <div class="row"><div class="muted">ניקוד:</div><div style="flex:1"></div><div class="score-pill" id="score">0</div></div>
+          <div class="row" style="margin-top:8px"><div class="muted">הישג גבוה:</div><div style="flex:1"></div><div class="score-pill" id="best">0</div></div>
+        </div>
+
+        <div class="controls">
+          <button id="start" class="primary">התחל / רצף</button>
+          <button id="pause">השהה</button>
+          <button id="reset">אתחל</button>
+        </div>
+
+        <div style="margin-top:10px" class="hint">
+          שלוט בחללית עם חצים שמאל/ימין או המשקף המגע — גע בצד השמאלי/ימני של המסך. 
+          אסוף כוכבים וצא מהמטאוריטים. כל כמה שניות המהירות עולה.
+        </div>
+
+        <div class="stat">
+          <div class="muted">מהירות נוכחית:</div>
+          <div class="big center" id="level">1</div>
+        </div>
+
+        <div class="footer">
+          <div>נבנה ב־HTML5 canvas — קוד פתוח לשימושך.</div>
+          <div style="margin-top:8px" class="muted">גרסה קטנה — אפשר להעתיק לקובץ .html ולהריץ בדפדפן.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+  // ======= הגדרות ראשוניות ========
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width; let H = canvas.height;
+
+  // UI
+  const startBtn = document.getElementById('start');
+  const pauseBtn = document.getElementById('pause');
+  const resetBtn = document.getElementById('reset');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const levelEl = document.getElementById('level');
+
+  // משחק
+  let running=false, paused=false;
+  let ship, asteroids=[], stars=[], particles=[];
+  let keys={left:false,right:false};
+  let score=0, best=0, level=1, spawnTimer=0, spawnInterval=80;
+
+  // איפוס
+  function resetGame(){
+    ship = {x:W/2, y:H-70, w:48, h:64, vx:0};
+    asteroids = [];
+    stars = [];
+    particles = [];
+    score = 0; level=1; spawnTimer=0; spawnInterval=80; running=false; paused=false;
+    scoreEl.textContent = score; levelEl.textContent = level;
+    best = Number(localStorage.getItem('dodger_best')||0); bestEl.textContent=best;
+    drawIntro();
+  }
+
+  // ציור חללית
+  function drawShip(s){
+    ctx.save();
+    // גוף
+    ctx.translate(s.x, s.y);
+    ctx.beginPath();
+    ctx.moveTo(0,-s.h/2);
+    ctx.lineTo(s.w/2, s.h/4);
+    ctx.lineTo(0,s.h/8);
+    ctx.lineTo(-s.w/2, s.h/4);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(110,231,183,0.95)';
+    ctx.fill();
+    // חלונות
+    ctx.beginPath();
+    ctx.ellipse(-6, -s.h/8, 8,6,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(2,6,23,0.9)'; ctx.fill();
+    ctx.restore();
+  }
+
+  // מחולל מטאוריטים
+  function spawnAsteroid(){
+    const size = 18 + Math.random()*40;
+    asteroids.push({x: Math.random()*(W-40)+20, y:-size, r:size, vy:1.2 + Math.random()*1.6 + level*0.2, rot:Math.random()*Math.PI*2, vrot:(Math.random()-0.5)*0.04});
+  }
+  function spawnStar(){
+    stars.push({x: Math.random()*(W-40)+20, y:-10, vy:1.8 + Math.random()*1.2 + level*0.15});
+  }
+
+  // לולאת עדכון
+  function update(){
+    if(!running || paused) return;
+    // קלט
+    const speed = 4 + level*0.3;
+    if(keys.left) ship.x -= speed; if(keys.right) ship.x += speed;
+    ship.x = Math.max(24, Math.min(W-24, ship.x));
+
+    // אסטרואידים
+    spawnTimer++;
+    if(spawnTimer % Math.max(20, spawnInterval - level*6) === 0) spawnAsteroid();
+    if(spawnTimer % 240 === 0) spawnStar();
+
+    for(let a of asteroids){
+      a.y += a.vy; a.rot += a.vrot;
+      if(a.y - a.r > H+60){ // נפלו מטה
+        createExplosion(a.x, H-20, Math.min(6, Math.floor(a.r/12))); // סילוק
+        score += Math.floor(a.r/10);
+        a.dead = true; scoreEl.textContent = score; checkLevelUp();
+      }
+    }
+    asteroids = asteroids.filter(a=>!a.dead);
+
+    // כוכבים
+    for(let s of stars){s.y += s.vy; if(s.y>H+20) s.dead=true;}
+    stars = stars.filter(s=>!s.dead);
+
+    // חלקיקים
+    for(let p of particles){p.x+=p.vx; p.y+=p.vy; p.life-=1;}
+    particles = particles.filter(p=>p.life>0);
+
+    // התנגשות: חללית מול מטאוריט
+    for(let a of asteroids){
+      const dx = a.x - ship.x; const dy = a.y - ship.y; const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < a.r + 20){ // פגיעת חור
+        running=false; showGameOver(); saveBest();
+      }
+    }
+
+    // איסוף כוכבים
+    for(let s of stars){
+      const dx = s.x - ship.x; const dy = s.y - ship.y; if(Math.abs(dx)<30 && Math.abs(dy)<30){ score += 50; s.dead=true; createSpark(s.x,s.y); scoreEl.textContent=score; checkLevelUp(); }
+    }
+  }
+
+  function checkLevelUp(){
+    const newLevel = 1 + Math.floor(score/500);
+    if(newLevel !== level){ level = newLevel; levelEl.textContent=level; }
+  }
+
+  // ציור מסך
+  function render(){
+    // רקע כוכבים
+    ctx.clearRect(0,0,W,H);
+    // כוכבים סטטיים
+    for(let i=0;i<60;i++){
+      const x = (i*97)%W; const y = (i*53)%H; const s = (i%3)+0.8;
+      ctx.fillStyle = 'rgba(255,255,255,'+ (0.02 + (i%5)*0.02) +')'; ctx.fillRect(x,y,s,s);
+    }
+
+    // כוכבים נופלים
+    for(let s of stars){ ctx.beginPath(); ctx.arc(s.x,s.y,6,0,Math.PI*2); ctx.fillStyle='rgba(255,237,153,0.95)'; ctx.fill(); }
+
+    // מטאוריטים
+    for(let a of asteroids){
+      ctx.save(); ctx.translate(a.x,a.y); ctx.rotate(a.rot);
+      ctx.beginPath(); ctx.moveTo(-a.r*0.4,-a.r*0.9);
+      for(let i=0;i<7;i++){ const ang = i*Math.PI*2/7; const rad = a.r*(0.5 + 0.5*Math.random()); ctx.lineTo(Math.cos(ang)*rad, Math.sin(ang)*rad); }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(150,140,150,0.95)'; ctx.fill();
+      ctx.restore();
+    }
+
+    // חלקיקים
+    for(let p of particles){ ctx.globalAlpha = Math.max(0, p.life/30); ctx.fillRect(p.x,p.y,2,2); }
+    ctx.globalAlpha = 1;
+
+    // שבב לוחיות
+    drawShip(ship);
+
+    // HUD קטנטן
+    ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(6,6,110,28);
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='13px system-ui'; ctx.fillText('ניקוד: '+score,14,24);
+  }
+
+  function loop(){ update(); render(); if(running && !paused) requestAnimationFrame(loop); }
+
+  // התחלה
+  function startGame(){ if(running){ paused=false; requestAnimationFrame(loop); } else { running=true; paused=false; spawnTimer=0; requestAnimationFrame(loop); } }
+
+  // עצירת משחק
+  function togglePause(){ if(!running) return; paused=!paused; if(!paused) requestAnimationFrame(loop); }
+
+  function showGameOver(){
+    // ציור מסך סוף
+    ctx.fillStyle='rgba(2,6,23,0.6)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='white'; ctx.font='bold 36px system-ui'; ctx.textAlign='center'; ctx.fillText('Game Over', W/2, H/2 - 12);
+    ctx.font='16px system-ui'; ctx.fillText('ניקוד סופי: '+score, W/2, H/2 + 18);
+    ctx.textAlign='start';
+  }
+
+  function saveBest(){ best = Math.max(best, score); localStorage.setItem('dodger_best', String(best)); bestEl.textContent = best; }
+
+  // אפקטים
+  function createExplosion(x,y,count=6){ for(let i=0;i<count;i++){ particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:30}); } }
+  function createSpark(x,y){ for(let i=0;i<15;i++){ particles.push({x,y,vx:(Math.random()-0.5)*4,vy:(Math.random()-1.5)*4,life:36}); } }
+
+  // אינטראקציות
+  window.addEventListener('keydown', e=>{ if(e.key==='ArrowLeft') keys.left=true; if(e.key==='ArrowRight') keys.right=true; if(e.key===' '){ if(!running) startGame(); else togglePause(); } });
+  window.addEventListener('keyup', e=>{ if(e.key==='ArrowLeft') keys.left=false; if(e.key==='ArrowRight') keys.right=false; });
+
+  // נגיעה למכשירים ניידים — חלק שמאל/ימין
+  canvas.addEventListener('touchstart', e=>{ e.preventDefault(); const t = e.touches[0]; const rect = canvas.getBoundingClientRect(); const x = t.clientX - rect.left; if(x < rect.width/2) { keys.left=true; } else { keys.right=true; } });
+  canvas.addEventListener('touchend', e=>{ keys.left=false; keys.right=false; });
+
+  // סמן עכבר כקלט
+  canvas.addEventListener('mousemove', e=>{ const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left; ship.x = x; });
+
+  // לחצנים
+  startBtn.addEventListener('click', ()=>{ startGame(); });
+  pauseBtn.addEventListener('click', ()=>{ togglePause(); });
+  resetBtn.addEventListener('click', ()=>{ resetGame(); });
+
+  // התאמת canvas לגודל בפיקסל (מניעת טשטוש)
+  function fixDpi(){ const dpr = Math.min(window.devicePixelRatio || 1,2); const rect = canvas.getBoundingClientRect(); canvas.width = Math.floor(rect.width * dpr); canvas.height = Math.floor(rect.height * dpr); W = canvas.width; H = canvas.height; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  window.addEventListener('resize', ()=>{ fixDpi(); render(); });
+
+  // ציור מסך פתיחה
+  function drawIntro(){ ctx.clearRect(0,0,W,H); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='white'; ctx.font='bold 28px system-ui'; ctx.textAlign='center'; ctx.fillText('חוסה מטאוריטים', W/2, H/2 - 14);
+    ctx.font='14px system-ui'; ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.fillText('התחל כדי לשחק — חצים, עכבר או מגע', W/2, H/2 + 10);
+    ctx.textAlign='start';
+  }
+
+  // התחלה ראשונית
+  fixDpi(); resetGame();
+
+  // אנימציה קלה תמידית עבור אפקט
+  (function idleLoop(){ render(); requestAnimationFrame(idleLoop); })();
+  </script>
+</body>
+</html>
