@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>הוספת שאלה</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <h1>➕ הוספת שאלה חדשה</h1>
+
+    <form method="POST" action="/add_question">
+
+        <p>השאלה</p>
+        <textarea name="question" rows="4" cols="60" required></textarea>
+
+        <br><br>
+
+        <p>תשובה 1</p>
+        <input type="text" name="answer1" required>
+
+        <br><br>
+
+        <p>תשובה 2</p>
+        <input type="text" name="answer2" required>
+
+        <br><br>
+
+        <p>תשובה 3</p>
+        <input type="text" name="answer3" required>
+
+        <br><br>
+
+        <p>תשובה 4</p>
+        <input type="text" name="answer4" required>
+
+        <br><br>
+
+        <p>מספר התשובה הנכונה</p>
+
+        <select name="correct_answer" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+
+        <br><br><br>
+
+        <button type="submit" class="play-button">
+            💾 שמור שאלה
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/questions">
+        ⬅ חזרה לניהול שאלות
+    </a>
+
+</div>
+
+</body>
+
+</html>

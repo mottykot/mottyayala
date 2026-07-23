@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול משתתפים</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <h1>👥 ניהול משתתפים</h1>
+
+
+    <br>
+
+
+    <a href="/add_participant">
+
+        <button class="play-button">
+            ➕ הוסף משתתף
+        </button>
+
+    </a>
+
+
+    <br><br>
+
+
+
+    {% if participants %}
+
+
+    <table border="1" width="100%" cellpadding="10">
+
+
+        <tr>
+
+            <th>מס'</th>
+            <th>שם</th>
+            <th>טלפון</th>
+            <th>ניקוד</th>
+            <th>פעולות</th>
+
+        </tr>
+
+
+
+        {% for participant in participants %}
+
+
+        <tr>
+
+
+            <td>
+                {{ participant.id }}
+            </td>
+
+
+            <td>
+                {{ participant.name }}
+            </td>
+
+
+            <td>
+                {{ participant.phone }}
+            </td>
+
+
+            <td>
+                {{ participant.score }}
+            </td>
+
+
+            <td>
+
+
+                <a href="/edit_participant/{{ participant.id }}">
+                    ✏ ערוך
+                </a>
+
+
+                &nbsp;&nbsp;
+
+
+                <a href="/delete_participant/{{ participant.id }}"
+                   onclick="return confirm('למחוק את המשתתף?');">
+
+                    🗑 מחק
+
+                </a>
+
+
+            </td>
+
+
+        </tr>
+
+
+        {% endfor %}
+
+
+
+    </table>
+
+
+    {% else %}
+
+
+        <p>עדיין אין משתתפים במערכת.</p>
+
+
+    {% endif %}
+
+
+
+    <br><br>
+
+
+    <a href="/manager">
+        ⬅ חזרה ללוח הבקרה
+    </a>
+
+
+
+</div>
+
+
+</body>
+
+</html>

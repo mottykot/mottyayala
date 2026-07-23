@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>לוח הבקרה</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <h1>🎮 לוח הבקרה</h1>
+
+    <div class="cards">
+
+        <a href="/questions">
+
+            <button class="play-button">
+                📝 ניהול שאלות
+            </button>
+
+        </a>
+
+        <a href="/participants">
+
+            <button class="play-button">
+                👥 ניהול משתתפים
+            </button>
+
+        </a>
+
+        <a href="/game">
+
+            <button class="play-button">
+                🎮 הפעלת משחק
+            </button>
+
+        </a>
+
+
+
+<a href="/settings">
+
+    <button class="play-button">
+        ⚙       הגדרות המשחק          
+    </button>
+
+</a>
+
+
+    </div>
+
+    <br><br>
+
+    <a href="/">
+        ⬅ חזרה לדף הראשי
+    </a>
+
+</div>
+
+</body>
+
+</html>

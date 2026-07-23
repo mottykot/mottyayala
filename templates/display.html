@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Quiz Live</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/display.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="background-glow"></div>
+
+
+<div class="main-container">
+
+
+<header class="top-bar">
+
+    <div class="logo">
+        🎮 QUIZ LIVE
+    </div>
+
+</header>
+
+
+
+
+{% if current_game %}
+
+
+
+    {% if status == "question" %}
+
+
+
+    <!-- =========================
+         QUESTION SCREEN
+    ========================== -->
+
+
+    <section class="question-panel">
+
+
+        <div class="question-title">
+            השאלה
+        </div>
+
+
+        <div class="question-text">
+
+            {{ current_game.question }}
+
+        </div>
+
+
+    </section>
+
+
+
+
+
+    <section class="answers">
+
+
+
+        <div class="answer">
+
+            <div class="number">
+                1
+            </div>
+
+            <div class="text">
+                {{ current_game.answer1 }}
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="answer">
+
+            <div class="number">
+                2
+            </div>
+
+            <div class="text">
+                {{ current_game.answer2 }}
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="answer">
+
+            <div class="number">
+                3
+            </div>
+
+            <div class="text">
+                {{ current_game.answer3 }}
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="answer">
+
+            <div class="number">
+                4
+            </div>
+
+            <div class="text">
+                {{ current_game.answer4 }}
+            </div>
+
+        </div>
+
+
+
+    </section>
+
+
+<audio id="questionMusic" loop>
+    <source src="{{ url_for('static', filename='audio/question_music.mp3') }}" type="audio/mpeg">
+</audio>
+
+
+
+    <div class="timer-area">
+
+
+        <div class="timer-circle" id="timer">
+
+            {{ remaining_time }}
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    {% elif status == "answer" %}
+
+<!-- =========================
+     ANSWER SCREEN
+========================= -->
+
+<section class="answer-screen">
+
+    <div class="answer-icon">
+        🎯
+    </div>
+
+    <div class="answer-title">
+        התשובה הנכונה
+    </div>
+
+    <div class="correct-answer-circle">
+
+        {{ current_game.correct_answer }}
+
+    </div>
+
+    <div class="correct-answer-text">
+
+        {% if current_game.correct_answer == 1 %}
+            {{ current_game.answer1 }}
+
+        {% elif current_game.correct_answer == 2 %}
+            {{ current_game.answer2 }}
+
+        {% elif current_game.correct_answer == 3 %}
+            {{ current_game.answer3 }}
+
+        {% else %}
+            {{ current_game.answer4 }}
+
+        {% endif %}
+
+    </div>
+
+    <div class="answer-message">
+
+        ✨ הצלחתם? מצוין! לא הצלחתם? נסו את מזלכם בשאלה הבאה!✨
+
+    </div>
+
+</section>
+
+{% elif status == "winner" %}
+
+
+<section class="winner-screen">
+
+
+<div class="answer-icon">
+
+🏆
+
+</div>
+
+
+<div class="answer-title">
+
+
+{% if winner_place == 1 %}
+
+🥇 מקום ראשון
+
+{% elif winner_place == 2 %}
+
+🥈 מקום שני
+
+{% else %}
+
+🥉 מקום שלישי
+
+{% endif %}
+
+
+</div>
+
+
+
+<div class="correct-answer-text">
+
+{{ current_game.winner["name"] }}
+
+</div>
+
+
+
+<div class="answer-message">
+
+ניקוד:
+{{ current_game.winner["score"] }}
+
+נקודות
+
+</div>
+
+<audio id="winnerSound">
+    <source src="{{ url_for('static', filename='audio/winner.mp3') }}" type="audio/mpeg">
+</audio>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sound = document.getElementById("winnerSound");
+
+    sound.play().catch(function(err) {
+        console.log("Audio blocked:", err);
+    });
+});
+</script>
+
+</section>
+
+
+
+
+{% elif status == "statistics" %}
+
+
+<!-- =========================
+     STATISTICS SCREEN
+========================= -->
+
+
+<section class="statistics-screen">
+
+
+    <div class="statistics-icon">
+        📊
+    </div>
+
+
+    <div class="statistics-title">
+
+        תוצאות הצבעה
+
+    </div>
+
+
+
+    <div class="statistics-container">
+
+
+        <div class="stat-row {% if current_game.correct_answer == 1 %}correct-stat{% endif %}">
+
+            <div class="stat-label">
+    {{ current_game.answer1 }}
+</div>
+
+
+            <div class="stat-value">
+
+                {{ statistics["1"] }}
+
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="stat-row {% if current_game.correct_answer == 2 %}correct-stat{% endif %}">
+
+            <div class="stat-label">
+    {{ current_game.answer2 }}
+</div>
+
+
+            <div class="stat-value">
+
+                {{ statistics["2"] }}
+
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="stat-row {% if current_game.correct_answer == 3 %}correct-stat{% endif %}">
+
+            <div class="stat-label">
+    {{ current_game.answer3 }}
+</div>
+
+
+            <div class="stat-value">
+
+                {{ statistics["3"] }}
+
+            </div>
+
+        </div>
+
+
+
+
+
+        <div class="stat-row {% if current_game.correct_answer == 4 %}correct-stat{% endif %}">
+
+            <div class="stat-label">
+    {{ current_game.answer4 }}
+</div>
+
+
+            <div class="stat-value">
+
+                {{ statistics["4"] }}
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+
+</section>
+
+
+
+{% endif %}
+
+
+
+
+
+{% else %}
+
+
+
+<!-- =========================
+     WAITING SCREEN
+========================== -->
+
+
+<div class="waiting">
+
+
+    <div class="waiting-icon">
+
+        🎮
+
+    </div>
+
+
+    <div class="waiting-text">
+
+        האם אתם בטוחים שאתם מוכנים לזה?...
+
+    </div>
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+</div>
+
+
+
+
+
+{% if current_game and status == "question" %}
+
+
+<script>
+
+
+let seconds = {{ remaining_time }};
+
+
+const timer = document.getElementById("timer");
+
+const music = document.getElementById("questionMusic");
+
+music.play().catch(function(err){
+    console.log(err);
+});
+
+const interval = setInterval(function(){
+
+
+    seconds--;
+
+
+    if(seconds >= 0){
+
+        timer.innerHTML = seconds;
+
+    }
+
+
+
+    if(seconds <= 0){
+
+    clearInterval(interval);
+
+    music.pause();
+    music.currentTime = 0;
+
+    timer.innerHTML = "⌛";
+
+}
+
+
+
+},1000);
+
+
+
+</script>
+
+
+{% endif %}
+
+
+<script>
+
+let lastVersion = {{ display_version }};
+
+setInterval(function () {
+
+    fetch("/display_status")
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.version !== lastVersion) {
+
+                location.reload();
+
+            }
+
+        });
+
+}, 500);
+
+</script>
+
+<script>
+console.log("STATUS =", "{{ status }}");
+</script>
+
+</body>
+
+</html>

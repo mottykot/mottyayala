@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>משחק</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <h1>🎮 משחק טריוויה</h1>
+
+
+
+    {% if current_game %}
+
+
+
+        <h2>השאלה הפעילה</h2>
+
+
+
+        <h3>
+            {{ current_game.question }}
+        </h3>
+
+
+
+        <button class="answer-button">
+            1. {{ current_game.answer1 }}
+        </button>
+
+
+        <br><br>
+
+
+        <button class="answer-button">
+            2. {{ current_game.answer2 }}
+        </button>
+
+
+        <br><br>
+
+
+        <button class="answer-button">
+            3. {{ current_game.answer3 }}
+        </button>
+
+
+        <br><br>
+
+
+        <button class="answer-button">
+            4. {{ current_game.answer4 }}
+        </button>
+
+
+
+        <br><br>
+
+
+
+        <h2 id="timer">
+
+            ⏱ {{ remaining_time }}
+
+        </h2>
+
+
+<br><br>
+
+
+<button
+    id="showAnswer"
+    class="play-button">
+
+    🎯 הצג תשובה במסך הגדול
+
+</button>
+
+<button
+    id="showStatistics"
+    class="play-button">
+
+    📊 הצג סטטיסטיקות במסך הגדול
+
+</button>
+<br><br>
+
+<<a href="/display_winners">
+
+<button
+    class="play-button">
+
+    🏆 הצג מנצחים במסך הגדול
+
+</button>
+
+</a>
+
+<hr>
+
+
+
+<h2>
+    🧪 בדיקת תשובה
+</h2>
+
+
+        <hr>
+
+
+        <form action="/test_answer" method="POST">
+
+
+            <label>
+                מספר טלפון:
+            </label>
+
+
+            <br>
+
+
+            <input type="text"
+                   name="phone"
+                   placeholder="0501234567">
+
+
+
+            <br><br>
+
+
+
+            <label>
+                בחירת תשובה:
+            </label>
+
+
+            <br>
+
+
+
+            <select name="answer">
+
+
+                <option value="1">
+                    תשובה 1
+                </option>
+
+
+                <option value="2">
+                    תשובה 2
+                </option>
+
+
+                <option value="3">
+                    תשובה 3
+                </option>
+
+
+                <option value="4">
+                    תשובה 4
+                </option>
+
+
+            </select>
+
+
+
+            <br><br>
+
+
+
+            <button class="play-button">
+
+                חזור לבחירת שאלה
+
+            </button>
+
+
+
+        </form>
+
+
+
+        <hr>
+
+
+
+        <h2>
+            📊 מצב תשובות
+        </h2>
+
+
+
+        <p>
+            סה"כ תשובות שהתקבלו:
+            {{ answers|length }}
+        </p>
+
+
+
+
+        {% if answers %}
+
+
+
+            {% for answer in answers %}
+
+
+
+                <p>
+
+                    📞 {{ answer.phone }}
+
+                    {% if answer.name %}
+
+                        - {{ answer.name }}
+
+                    {% endif %}
+
+                    <br>
+
+                    תשובה:
+                    {{ answer.answer }}
+
+                    <br>
+
+                    {% if answer.correct %}
+
+                        ✅ נכון
+
+                    {% else %}
+
+                        ❌ לא נכון
+
+                    {% endif %}
+
+                    |
+
+                    ניקוד:
+                    {{ answer.score }}
+
+                </p>
+
+
+
+                <hr>
+
+
+
+            {% endfor %}
+
+
+
+        {% else %}
+
+
+
+            <p>
+                עדיין לא התקבלו תשובות
+            </p>
+
+
+
+        {% endif %}
+
+
+
+        <br>
+
+
+
+        <a href="/stop_game">
+
+            <button class="delete-button">
+
+                ⏹ עצור משחק
+
+            </button>
+
+
+        </a>
+
+
+
+
+    {% else %}
+
+
+
+        <p>
+            בחר שאלה להפעלה:
+        </p>
+
+
+
+        {% if questions %}
+
+
+
+            {% for question in questions %}
+
+
+
+                <div>
+
+
+                    <p>
+
+                        {{ question.id }}.
+                        {{ question.question }}
+
+                    </p>
+
+
+
+                    <a href="/start_game/{{ question.id }}">
+
+
+                        <button class="play-button">
+
+                            ▶ התחל שאלה
+
+                        </button>
+
+
+                    </a>
+
+
+                </div>
+
+
+                <hr>
+
+
+
+            {% endfor %}
+
+
+
+        {% else %}
+
+
+
+            <p>
+                אין שאלות במערכת
+            </p>
+
+
+
+        {% endif %}
+
+
+
+    {% endif %}
+
+
+
+    <br>
+
+
+
+    <a href="/manager">
+
+        ⬅ חזרה ללוח הבקרה
+
+    </a>
+
+
+
+</div>
+
+
+
+
+{% if current_game %}
+
+
+
+<script>
+
+
+let seconds = {{ remaining_time }};
+
+
+const timer = document.getElementById("timer");
+
+
+
+const interval = setInterval(function () {
+
+
+    seconds--;
+
+
+    if (seconds >= 0) {
+
+
+        timer.innerHTML = "⏱ " + seconds;
+
+
+    }
+
+
+    if (seconds <= 0) {
+
+
+        clearInterval(interval);
+
+
+        timer.innerHTML = "⌛ הזמן הסתיים";
+
+
+    }
+
+
+}, 1000);
+
+
+
+</script>
+
+
+
+{% endif %}
+
+<script>
+
+document
+    .getElementById("showAnswer")
+    .addEventListener("click", function () {
+
+        fetch("/display_answer");
+
+    });
+
+
+document
+    .getElementById("showStatistics")
+    .addEventListener("click", function () {
+
+        fetch("/display_statistics");
+
+    });
+
+
+document
+    .getElementById("showWinners")
+    .addEventListener("click", function () {
+
+        fetch("/display_winners");
+
+    });
+
+</script>
+
+</body>
+
+</html>

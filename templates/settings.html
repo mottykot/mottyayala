@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>הגדרות משחק</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="main-card">
+
+
+<h2>
+⚙ הגדרות משחק
+</h2>
+
+
+<form method="POST" action="/save_settings">
+
+
+<label>
+אורך הטיימר בשניות:
+</label>
+
+
+<br><br>
+
+
+<input 
+type="number"
+name="timer"
+value="{{ timer }}"
+min="1"
+max="300"
+>
+
+
+<br><br><br><br>
+
+<label>
+מספר נקודות לתשובה נכונה:
+</label>
+
+<br><br>
+
+<input
+type="number"
+name="points"
+value="{{ points }}"
+min="1"
+max="1000"
+>
+
+
+<br><br>
+
+
+<button class="play-button">
+
+שמור
+
+</button>
+
+
+</form>
+
+
+<br>
+
+
+<a href="/manager">
+
+חזרה לניהול
+
+</a>
+
+
+</div>
+
+
+</body>
+
+</html>

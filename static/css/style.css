@@ -1,0 +1,134 @@
+/* ===========================
+   עיצוב כללי
+=========================== */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #1b3b80, #08142d);
+    color: white;
+    min-height: 100vh;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+/* ===========================
+   דף הבית
+=========================== */
+
+.main-card {
+
+    width: 600px;
+    margin: 120px auto;
+    text-align: center;
+
+    background: rgba(255,255,255,.08);
+
+    backdrop-filter: blur(10px);
+
+    border-radius: 25px;
+
+    padding: 50px;
+
+    box-shadow: 0 0 30px rgba(255,255,255,.15);
+
+}
+
+.main-card h1 {
+    font-size: 80px;
+    margin: 0;
+}
+
+.main-card h2 {
+    font-size: 42px;
+}
+
+.play-button {
+
+    margin-top: 40px;
+
+    font-size: 30px;
+
+    padding: 20px 60px;
+
+    border: none;
+
+    border-radius: 50px;
+
+    cursor: pointer;
+
+    background: #ffd54a;
+
+}
+
+.play-button:hover {
+    transform: scale(1.05);
+}
+
+.manager-button {
+
+    position: fixed;
+
+    top: 20px;
+
+    left: 20px;
+
+    color: white;
+
+    opacity: .7;
+
+}
+
+/* ===========================
+   לוח הבקרה
+=========================== */
+
+.dashboard {
+
+    width: 1100px;
+
+    margin: 40px auto;
+
+    text-align: center;
+
+}
+
+.cards {
+
+    display: grid;
+
+    grid-template-columns: repeat(2,1fr);
+
+    gap: 30px;
+
+    margin-top: 50px;
+
+}
+
+.card {
+
+    background: rgba(255,255,255,.08);
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    cursor: pointer;
+
+    transition: .3s;
+
+    box-shadow: 0 0 15px rgba(255,255,255,.1);
+
+}
+
+.card:hover {
+
+    transform: translateY(-8px);
+
+    box-shadow: 0 0 25px rgba(255,255,255,.3);
+
+}
+

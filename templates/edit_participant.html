@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>עריכת משתתף</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <h1>✏ עריכת משתתף</h1>
+
+
+    <form method="POST"
+          action="/edit_participant/{{ participant.id }}">
+
+
+        <p>שם המשתתף</p>
+
+        <input type="text"
+               name="name"
+               value="{{ participant.name }}"
+               required>
+
+
+        <br><br>
+
+
+        <p>מספר טלפון</p>
+
+        <input type="text"
+               name="phone"
+               value="{{ participant.phone }}"
+               required>
+
+
+        <br><br><br>
+
+
+        <button type="submit"
+                class="play-button">
+
+            💾 שמור שינויים
+
+        </button>
+
+
+    </form>
+
+
+    <br>
+
+
+    <a href="/participants">
+        ⬅ חזרה לניהול משתתפים
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

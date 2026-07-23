@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>עריכת שאלה</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+
+
+<div class="dashboard">
+
+
+    <h1>✏ עריכת שאלה</h1>
+
+
+    <form method="POST" action="/edit_question/{{ question.id }}">
+
+
+        <p>השאלה</p>
+
+        <textarea name="question"
+                  rows="4"
+                  cols="60"
+                  required>{{ question.question }}</textarea>
+
+
+        <br><br>
+
+
+        <p>תשובה 1</p>
+
+        <input type="text"
+               name="answer1"
+               value="{{ question.answer1 }}"
+               required>
+
+
+        <br><br>
+
+
+        <p>תשובה 2</p>
+
+        <input type="text"
+               name="answer2"
+               value="{{ question.answer2 }}"
+               required>
+
+
+        <br><br>
+
+
+        <p>תשובה 3</p>
+
+        <input type="text"
+               name="answer3"
+               value="{{ question.answer3 }}"
+               required>
+
+
+        <br><br>
+
+
+        <p>תשובה 4</p>
+
+        <input type="text"
+               name="answer4"
+               value="{{ question.answer4 }}"
+               required>
+
+
+        <br><br>
+
+
+        <p>מספר התשובה הנכונה</p>
+
+
+        <select name="correct_answer">
+
+
+            <option value="1"
+            {% if question.correct_answer == 1 %}selected{% endif %}>
+                1
+            </option>
+
+
+            <option value="2"
+            {% if question.correct_answer == 2 %}selected{% endif %}>
+                2
+            </option>
+
+
+            <option value="3"
+            {% if question.correct_answer == 3 %}selected{% endif %}>
+                3
+            </option>
+
+
+            <option value="4"
+            {% if question.correct_answer == 4 %}selected{% endif %}>
+                4
+            </option>
+
+
+        </select>
+
+
+        <br><br><br>
+
+
+        <button type="submit" class="play-button">
+
+            💾 שמור שינויים
+
+        </button>
+
+
+    </form>
+
+
+    <br>
+
+
+    <a href="/questions">
+        ⬅ חזרה לניהול שאלות
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

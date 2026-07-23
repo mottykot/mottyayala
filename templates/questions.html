@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול שאלות</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <h1>📝 ניהול שאלות</h1>
+
+    <br>
+
+    <a href="/add_question">
+        <button class="play-button">
+            ➕ הוסף שאלה
+        </button>
+    </a>
+
+    <br><br>
+
+    {% if questions %}
+
+    <table border="1" width="100%" cellpadding="10">
+
+        <tr>
+            <th>מס'</th>
+            <th>השאלה</th>
+            <th>תשובה נכונה</th>
+            <th>פעולות</th>
+        </tr>
+
+
+        {% for question in questions %}
+
+        <tr>
+
+            <td>{{ question.id }}</td>
+
+            <td>{{ question.question }}</td>
+
+            <td>{{ question.correct_answer }}</td>
+
+            <td>
+
+                <a href="/edit_question/{{ question.id }}">
+                    ✏ ערוך
+                </a>
+
+                &nbsp;&nbsp;
+
+                <a href="/delete_question/{{ question.id }}"
+                   onclick="return confirm('למחוק את השאלה?');">
+
+                    🗑 מחק
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+
+    </table>
+
+
+    {% else %}
+
+        <p>עדיין אין שאלות במערכת.</p>
+
+    {% endif %}
+
+
+    <br><br>
+
+
+    <a href="/manager">
+        ⬅ חזרה ללוח הבקרה
+    </a>
+
+
+</div>
+
+</body>
+
+</html>
