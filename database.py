@@ -1,6 +1,8 @@
+import os
 import sqlite3
 
-DATABASE_NAME = "quiz.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_NAME = os.path.join(BASE_DIR, "quiz.db")
 
 
 def create_database():
