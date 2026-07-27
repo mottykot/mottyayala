@@ -438,6 +438,28 @@ def display_status():
     })
 
 
+@app.route("/api/yemot", methods=["GET", "POST"])
+def yemot_api():
+
+    phone = request.values.get("ApiPhone", "")
+    answer = request.values.get("val_1", "")
+
+    print("================================")
+    print("Request from Yemot")
+    print("Phone:", phone)
+    print("Answer:", answer)
+    print("All params:", dict(request.values))
+    print("================================")
+
+    if phone and answer:
+
+        submit_answer(phone, answer)
+
+    return (
+        "id_list_message=t-התשובה התקבלה בהצלחה\n"
+        "go_to_folder=hangup"
+    )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
